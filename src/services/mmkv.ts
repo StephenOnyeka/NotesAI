@@ -1,11 +1,11 @@
-import { createMMKV } from 'react-native-mmkv';
+import { createMMKV } from "react-native-mmkv";
 
-import type { Note, TodoItem } from '@/types';
+import type { Note, TodoItem } from "@/types";
 
-export const storage = createMMKV({ id: 'notes-ai-storage' });
+export const storage = createMMKV({ id: "notes-ai-storage" });
 
-const NOTES_KEY = 'notes';
-const TODOS_KEY = 'todos';
+const NOTES_KEY = "notes";
+const TODOS_KEY = "todos";
 
 // ─── Notes ────────────────────────────────────────────────────────────────────
 

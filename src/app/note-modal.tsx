@@ -1,7 +1,7 @@
+"use no memo";
 import { ArrowLeft, TickSquare } from 'iconsax-react-nativejs';
 import { useRef, useState } from 'react';
 import {
-  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -11,12 +11,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEditorBridge } from '@10play/tentap-editor';
 
 import { RichNoteEditor } from '@/components/editor/RichNoteEditor';
 import { useNotes } from '@/hooks/useNotes';
 import { Colors, Spacing } from '@/constants/theme';
-
 
 export default function NoteModal() {
   const scheme = useColorScheme();
@@ -31,7 +29,7 @@ export default function NoteModal() {
   const [contentHTML, setContentHTML] = useState(existing?.contentHTML ?? '');
   const [contentJSON, setContentJSON] = useState(existing?.contentJSON ?? '');
 
-  const editorRef = useRef<ReturnType<typeof useEditorBridge> | null>(null);
+  const editorRef = useRef<any>(null);
 
   const handleContentChange = (html: string, json: string) => {
     setContentHTML(html);
@@ -63,8 +61,8 @@ export default function NoteModal() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        {/* Toolbar */}
+      <SafeAreaView style={styles.safeArea} edges={['top']}>
+        {/* Header Toolbar */}
         <View style={[styles.toolbar, { borderBottomColor: colors.backgroundElement }]}>
           <TouchableOpacity onPress={() => router.back()} hitSlop={8} style={styles.toolbarBtn}>
             <ArrowLeft size={22} color={colors.text} variant="Outline" />
@@ -79,7 +77,7 @@ export default function NoteModal() {
           </TouchableOpacity>
         </View>
 
-        {/* Title input */}
+        {/* Title Input */}
         <TextInput
           style={[styles.titleInput, { color: colors.text }]}
           placeholder="Title"
@@ -90,14 +88,12 @@ export default function NoteModal() {
           multiline={false}
         />
 
-        {/* Rich Editor */}
-        <View style={styles.editorContainer}>
-          <RichNoteEditor
-            initialContent={existing?.contentHTML ?? ''}
-            onContentChange={handleContentChange}
-            editorRef={editorRef}
-          />
-        </View>
+        {/* Rich Note Editor */}
+        <RichNoteEditor
+          initialContent={existing?.contentHTML ?? ''}
+          onContentChange={handleContentChange}
+          editorRef={editorRef}
+        />
       </SafeAreaView>
     </View>
   );
@@ -131,14 +127,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
     letterSpacing: -0.3,
-  },
-  editorContainer: {
-    flex: 1,
-    minHeight: 400,
-    borderColor: 'red',
-    borderWidth: 2,
-    borderRadius: 8,
-    paddingHorizontal: Spacing.three,
-    paddingBottom: Platform.OS === 'ios' ? 0 : Spacing.three,
   },
 });
