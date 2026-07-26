@@ -1,5 +1,5 @@
 "use no memo";
-import { ArrowLeft, TickSquare } from 'iconsax-react-nativejs';
+import { ArrowLeft, TickCircle } from 'iconsax-react-nativejs';
 import { useRef, useState } from 'react';
 import {
   StyleSheet,
@@ -73,7 +73,7 @@ export default function NoteModal() {
           </Text>
 
           <TouchableOpacity onPress={handleSave} hitSlop={8} style={styles.toolbarBtn}>
-            <TickSquare size={22} color="#6C63FF" variant="Bold" />
+            <TickCircle size={25} color={colors.text} variant="Linear" />
           </TouchableOpacity>
         </View>
 

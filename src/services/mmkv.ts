@@ -1,11 +1,33 @@
-import { createMMKV } from "react-native-mmkv";
+import type { Note, TodoItem } from '@/types';
 
-import type { Note, TodoItem } from "@/types";
+type StorageInterface = {
+  getString: (key: string) => string | undefined;
+  set: (key: string, value: string) => void;
+  delete: (key: string) => void;
+  addOnValueChangedListener: (onValueChanged: (key: string) => void) => { remove: () => void };
+};
 
-export const storage = createMMKV({ id: "notes-ai-storage" });
+// Safe storage initialization with Expo Go in-memory fallback
+let storageInstance: StorageInterface;
 
-const NOTES_KEY = "notes";
-const TODOS_KEY = "todos";
+try {
+  const { createMMKV } = require('react-native-mmkv');
+  storageInstance = createMMKV({ id: 'notes-ai-storage' });
+} catch (e) {
+  // Expo Go does not include custom native C++ modules (NitroModules required by MMKV v3+)
+  const memoryStore = new Map<string, string>();
+  storageInstance = {
+    getString: (key: string) => memoryStore.get(key),
+    set: (key: string, value: string) => memoryStore.set(key, value),
+    delete: (key: string) => memoryStore.delete(key),
+    addOnValueChangedListener: () => ({ remove: () => {} }),
+  };
+}
+
+export const storage = storageInstance;
+
+const NOTES_KEY = 'notes';
+const TODOS_KEY = 'todos';
 
 // ─── Notes ────────────────────────────────────────────────────────────────────
 
