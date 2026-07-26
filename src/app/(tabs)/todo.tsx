@@ -273,8 +273,8 @@ const styles = StyleSheet.create({
   priorityChip: {
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1.5,
+    borderRadius: 100,
+    borderWidth: 1,
   },
   addBtn: {
     marginLeft: 'auto',

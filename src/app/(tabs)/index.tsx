@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
   },
   heading: {
     fontSize: 32,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.5,
   },
   subheading: {

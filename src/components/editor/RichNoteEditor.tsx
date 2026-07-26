@@ -67,9 +67,6 @@ export function RichNoteEditor({
           tintColor: colors.textSecondary,
         },
       },
-      webview: {
-        backgroundColor: colors.background,
-      },
     },
   });
 
@@ -102,10 +99,11 @@ const styles = StyleSheet.create({
   editorWrapper: {
     flex: 1,
     paddingHorizontal: 12,
+    fontSize: 16,
   },
   richText: {
     flex: 1,
-    // fontSize: 16,
+    // fontSize: 20,
   },
   stickyView: {
     width: "100%",

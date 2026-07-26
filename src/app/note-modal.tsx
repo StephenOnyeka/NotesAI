@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   titleInput: {
     fontSize: 26,
-    fontWeight: '700',
+    fontWeight: '600',
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
     letterSpacing: -0.3,
