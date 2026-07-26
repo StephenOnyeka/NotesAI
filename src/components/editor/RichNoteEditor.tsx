@@ -1,18 +1,19 @@
-import React, { useRef } from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
-import { KeyboardStickyView } from "react-native-keyboard-controller";
 import {
-  actions,
-  RichEditor,
-  RichToolbar,
-} from "react-native-pell-rich-editor";
+  RichText,
+  Toolbar,
+  useEditorBridge,
+  type EditorBridge,
+} from "@10play/tentap-editor";
+import { KeyboardStickyView } from "react-native-keyboard-controller";
 
 import { Colors } from "@/constants/theme";
 
 type RichNoteEditorProps = {
   initialContent?: string;
   onContentChange?: (html: string, json: string) => void;
-  editorRef?: React.MutableRefObject<RichEditor | null>;
+  editorRef?: React.MutableRefObject<EditorBridge | null>;
 };
 
 export function RichNoteEditor({
@@ -24,66 +25,71 @@ export function RichNoteEditor({
   const colors =
     Colors[scheme === "unspecified" ? "light" : (scheme ?? "light")];
 
-  const richText = useRef<RichEditor>(null);
+  const editor = useEditorBridge({
+    autofocus: false,
+    avoidIosKeyboard: true,
+    initialContent: initialContent || "<p></p>",
+    onChange: () => {
+      editor.getHTML().then((html) => {
+        onContentChange?.(html, "");
+      });
+    },
+    theme: {
+      toolbar: {
+        toolbarBody: {
+          backgroundColor: colors.background,
+          borderTopWidth: 1,
+          borderTopColor: colors.backgroundElement,
+          borderBottomWidth: 0,
+          height: 48,
+          minWidth: "100%",
+        },
+        toolbarButton: {
+          backgroundColor: colors.background,
+        },
+        iconWrapper: {
+          backgroundColor: colors.background,
+          borderRadius: 6,
+        },
+        iconWrapperActive: {
+          backgroundColor: colors.backgroundSelected,
+        },
+        iconWrapperDisabled: {
+          opacity: 0.5,
+        },
+        icon: {
+          tintColor: colors.text,
+        },
+        iconActive: {
+          tintColor: "#6C63FF",
+        },
+        iconDisabled: {
+          tintColor: colors.textSecondary,
+        },
+      },
+      webview: {
+        backgroundColor: colors.background,
+      },
+    },
+  });
 
-  React.useEffect(() => {
+  // Expose the editor bridge via editorRef so parent can call methods like getHTML()
+  useEffect(() => {
     if (editorRef) {
-      editorRef.current = richText.current;
+      editorRef.current = editor;
     }
-  }, [editorRef]);
-
-  const handleChange = (html: string) => {
-    onContentChange?.(html, "");
-  };
+  }, [editorRef, editor]);
 
   return (
-    <View style={styles.container}>
-      <RichEditor
-        ref={richText}
-        initialContentHTML={initialContent}
-        onChange={handleChange}
-        placeholder="Start writing your notes here..."
-        useContainer={false}
-        editorStyle={{
-          backgroundColor: colors.background,
-          color: colors.text,
-          placeholderColor: colors.textSecondary,
-          contentCSSText: `
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 16px;
-            line-height: 1.6;
-            padding: 8px 12px;
-          `,
-        }}
-        style={styles.editor}
-      />
-
-      <KeyboardStickyView>
-        <RichToolbar
-          editor={richText}
-          actions={[
-            actions.keyboard,
-            actions.setBold,
-            actions.setItalic,
-            actions.setUnderline,
-            actions.insertBulletsList,
-            actions.insertOrderedList,
-            actions.checkboxList,
-            actions.insertLink,
-            actions.undo,
-            actions.redo,
-          ]}
-          iconTint={colors.textSecondary}
-          selectedIconTint="#6C63FF"
-          disabledIconTint={colors.backgroundElement}
-          style={[
-            styles.toolbar,
-            {
-              backgroundColor: colors.background,
-              borderTopColor: colors.backgroundElement,
-            },
-          ]}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.editorWrapper}>
+        <RichText
+          editor={editor}
+          style={[styles.richText, { backgroundColor: colors.background }]}
         />
+      </View>
+      <KeyboardStickyView style={[styles.stickyView, { backgroundColor: colors.background }]}>
+        <Toolbar editor={editor} hidden={false} />
       </KeyboardStickyView>
     </View>
   );
@@ -93,11 +99,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  editor: {
+  editorWrapper: {
     flex: 1,
   },
-  toolbar: {
-    borderTopWidth: 1,
-    height: 50,
+  richText: {
+    flex: 1,
+  },
+  stickyView: {
+    width: "100%",
+    minHeight: 48,
   },
 });

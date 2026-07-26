@@ -1,6 +1,7 @@
 "use no memo";
 import { ArrowLeft, TickCircle } from 'iconsax-react-nativejs';
 import { useRef, useState } from 'react';
+import type { EditorBridge } from '@10play/tentap-editor';
 import {
   StyleSheet,
   Text,
@@ -29,7 +30,7 @@ export default function NoteModal() {
   const [contentHTML, setContentHTML] = useState(existing?.contentHTML ?? '');
   const [contentJSON, setContentJSON] = useState(existing?.contentJSON ?? '');
 
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<EditorBridge | null>(null);
 
   const handleContentChange = (html: string, json: string) => {
     setContentHTML(html);
