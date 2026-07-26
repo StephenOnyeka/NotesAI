@@ -101,9 +101,11 @@ const styles = StyleSheet.create({
   },
   editorWrapper: {
     flex: 1,
+    paddingHorizontal: 12,
   },
   richText: {
     flex: 1,
+    // fontSize: 16,
   },
   stickyView: {
     width: "100%",

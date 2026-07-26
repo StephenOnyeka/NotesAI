@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { useNotes } from '@/hooks/useNotes';
 import { Colors, Spacing } from '@/constants/theme';
 import type { Note } from '@/types';
+import { stripHtmlAndDecode } from '@/utils/text';
 
 function timeAgo(ts: number): string {
   const diff = Date.now() - ts;
@@ -27,10 +28,6 @@ function timeAgo(ts: number): string {
   if (hrs < 24) return `${hrs}h ago`;
   const days = Math.floor(hrs / 24);
   return `${days}d ago`;
-}
-
-function stripHtml(html: string): string {
-  return html.replace(/<[^>]*>/g, '').slice(0, 100);
 }
 
 type NoteCardProps = {
@@ -57,7 +54,7 @@ function NoteCard({ note, colors, onPress, onDelete, onPin }: NoteCardProps) {
         {note.title || 'Untitled'}
       </Text>
       <Text style={[styles.cardSnippet, { color: colors.textSecondary }]} numberOfLines={2}>
-        {stripHtml(note.contentHTML) || 'No content'}
+        {stripHtmlAndDecode(note.contentHTML) || 'No content'}
       </Text>
       <View style={styles.cardFooter}>
         <Text style={[styles.cardTime, { color: colors.textSecondary }]}>

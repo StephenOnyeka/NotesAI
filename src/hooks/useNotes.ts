@@ -7,6 +7,7 @@ import {
   storage,
 } from '@/services/mmkv';
 import type { Note } from '@/types';
+import { stripHtmlAndDecode } from '@/utils/text';
 
 function generateId() {
   return `note_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -67,11 +68,10 @@ export function useNotes() {
     (query: string): Note[] => {
       if (!query.trim()) return notes;
       const q = query.toLowerCase();
-      return notes.filter(
-        (n) =>
-          n.title.toLowerCase().includes(q) ||
-          n.contentHTML.toLowerCase().includes(q),
-      );
+      return notes.filter((n) => {
+        const plainContent = stripHtmlAndDecode(n.contentHTML).toLowerCase();
+        return n.title.toLowerCase().includes(q) || plainContent.includes(q);
+      });
     },
     [notes],
   );
