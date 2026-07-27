@@ -1,11 +1,11 @@
-import React, { useEffect } from "react";
-import { StyleSheet, useColorScheme, View } from "react-native";
 import {
   RichText,
   Toolbar,
   useEditorBridge,
   type EditorBridge,
 } from "@10play/tentap-editor";
+import React, { useEffect } from "react";
+import { StyleSheet, useColorScheme, View } from "react-native";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
 
 import { Colors } from "@/constants/theme";
@@ -77,15 +77,28 @@ export function RichNoteEditor({
     }
   }, [editorRef, editor]);
 
+  // Set text color inside the editor
+  useEffect(() => {
+    editor.injectCSS(
+      `* { color: ${colors.textSecondary}; }`,
+      "editor-text-color"
+    );
+  }, [editor, colors.textSecondary]);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.editorWrapper}>
         <RichText
           editor={editor}
-          style={[styles.richText, { backgroundColor: colors.background }]}
+          style={[
+            styles.richText,
+            { backgroundColor: colors.background},
+          ]}
         />
       </View>
-      <KeyboardStickyView style={[styles.stickyView, { backgroundColor: colors.background }]}>
+      <KeyboardStickyView
+        style={[styles.stickyView, { backgroundColor: colors.background }]}
+      >
         <Toolbar editor={editor} hidden={false} />
       </KeyboardStickyView>
     </View>
@@ -99,11 +112,9 @@ const styles = StyleSheet.create({
   editorWrapper: {
     flex: 1,
     paddingHorizontal: 12,
-    fontSize: 16,
   },
   richText: {
     flex: 1,
-    // fontSize: 20,
   },
   stickyView: {
     width: "100%",
