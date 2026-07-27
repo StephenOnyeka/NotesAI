@@ -16,6 +16,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { RichNoteEditor } from '@/components/editor/RichNoteEditor';
 import { useNotes } from '@/hooks/useNotes';
 import { Colors, Spacing } from '@/constants/theme';
+import { CustomDateTimePicker } from '@/components/ui/CustomDateTimePicker';
 
 export default function NoteModal() {
   const scheme = useColorScheme();
@@ -129,4 +130,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     letterSpacing: -0.3,
   },
+  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
+  sheet: { backgroundColor: '#2A2A2A', borderRadius: 16, padding: Spacing.two },
 });

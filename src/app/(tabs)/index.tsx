@@ -18,6 +18,7 @@ import { useNotes } from '@/hooks/useNotes';
 import { Colors, Spacing } from '@/constants/theme';
 import type { Note } from '@/types';
 import NoteCard from '@/components/ui/noteCard';
+import { CustomDateTimePicker } from '@/components/ui/CustomDateTimePicker';
 
 export default function NotesScreen() {
   const scheme = useColorScheme();
@@ -98,6 +99,7 @@ export default function NotesScreen() {
             )}
           />
         )}
+        <CustomDateTimePicker/>
       </SafeAreaView>
 
       {/* FAB */}
