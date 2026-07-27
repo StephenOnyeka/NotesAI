@@ -2,6 +2,7 @@ import {
   Add,
   Clock,
   CloseCircle,
+  CloseSquare,
   Notification,
   TaskSquare,
   TickCircle,
@@ -99,10 +100,11 @@ function TodoRow({ item, colors, onToggle, onDelete }: TodoRowProps) {
         {item.isCompleted ? (
           <TickCircle size={22} color="#6C63FF" variant="Bold" />
         ) : (
-          <CloseCircle
+          <TickCircle
             size={22}
             color={colors.textSecondary}
-            variant="Outline"
+            // variant="Outline"
+            variant="TwoTone"
           />
         )}
       </TouchableOpacity>
@@ -309,10 +311,11 @@ export default function TodoScreen() {
                 New Task
               </Text>
               <TouchableOpacity onPress={handleCloseModal} hitSlop={8}>
-                <CloseCircle
+                {/* <CloseCircle */}
+                <CloseSquare
                   size={22}
                   color={colors.textSecondary}
-                  variant="Outline"
+                  variant="Bold"
                 />
               </TouchableOpacity>
             </View>
@@ -468,6 +471,7 @@ export default function TodoScreen() {
               {/* Custom date picker — controlled externally */}
               <CustomDateTimePicker
                 visible={customPickerVisible}
+                initialDate={dueDate ? new Date(dueDate) : undefined}
                 onClose={() => setCustomPickerVisible(false)}
                 onConfirm={handleCustomConfirm}
               />
@@ -667,7 +671,6 @@ const styles = StyleSheet.create({
   reminderDetailText: {
     fontSize: 12,
     fontWeight: "500",
-    marginTop: 2,
   },
   saveTaskBtn: {
     borderRadius: 14,
