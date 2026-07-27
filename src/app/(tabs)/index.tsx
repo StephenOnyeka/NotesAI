@@ -17,61 +17,7 @@ import { useRouter } from 'expo-router';
 import { useNotes } from '@/hooks/useNotes';
 import { Colors, Spacing } from '@/constants/theme';
 import type { Note } from '@/types';
-import { stripHtmlAndDecode } from '@/utils/text';
-
-function timeAgo(ts: number): string {
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-}
-
-type NoteCardProps = {
-  note: Note;
-  colors: typeof Colors.light | typeof Colors.dark;
-  onPress: () => void;
-  onDelete: () => void;
-  onPin: () => void;
-};
-
-function NoteCard({ note, colors, onPress, onDelete, onPin }: NoteCardProps) {
-  return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.card,
-        { backgroundColor: colors.backgroundElement, opacity: pressed ? 0.82 : 1 },
-      ]}
-      onPress={onPress}
-    >
-      {note.isPinned && (
-        <Paperclip2 size={13} color={colors.textSecondary} variant="Bold" style={styles.pinBadge} />
-      )}
-      <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>
-        {note.title || 'Untitled'}
-      </Text>
-      <Text style={[styles.cardSnippet, { color: colors.textSecondary }]} numberOfLines={2}>
-        {stripHtmlAndDecode(note.contentHTML) || 'No content'}
-      </Text>
-      <View style={styles.cardFooter}>
-        <Text style={[styles.cardTime, { color: colors.textSecondary }]}>
-          {timeAgo(note.updatedAt)}
-        </Text>
-        <View style={styles.cardActions}>
-          <TouchableOpacity onPress={onPin} style={styles.actionBtn} hitSlop={8}>
-            <Paperclip2 size={16} color={note.isPinned ? '#6C63FF' : colors.textSecondary} variant={note.isPinned ? 'Bold' : 'Outline'} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onDelete} style={styles.actionBtn} hitSlop={8}>
-            <Trash size={16} color="#FF6B6B" variant="Outline" />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Pressable>
-  );
-}
+import NoteCard from '@/components/ui/noteCard';
 
 export default function NotesScreen() {
   const scheme = useColorScheme();
@@ -209,45 +155,6 @@ const styles = StyleSheet.create({
   columnWrapper: {
     gap: Spacing.two,
     marginBottom: Spacing.two,
-  },
-  card: {
-    flex: 1,
-    borderRadius: 16,
-    padding: Spacing.three,
-    minHeight: 130,
-    position: 'relative',
-  },
-  pinBadge: {
-    position: 'absolute',
-    top: Spacing.two,
-    right: Spacing.two,
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 6,
-    marginRight: 18,
-  },
-  cardSnippet: {
-    fontSize: 13,
-    lineHeight: 18,
-    flex: 1,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: Spacing.two,
-  },
-  cardTime: {
-    fontSize: 11,
-  },
-  cardActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  actionBtn: {
-    padding: 2,
   },
   empty: {
     flex: 1,

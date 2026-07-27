@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 
+import { stripHtmlAndDecode } from "@/components/utils/text";
 import {
   deleteNote as deleteNoteStorage,
   getNotes,
   saveNote,
   storage,
-} from '@/services/mmkv';
-import type { Note } from '@/types';
-import { stripHtmlAndDecode } from '@/utils/text';
+} from "@/services/mmkv";
+import type { Note } from "@/types";
 
 function generateId() {
   return `note_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -19,7 +19,7 @@ export function useNotes() {
   // Sync from storage when the MMKV key changes (e.g. from another screen)
   useEffect(() => {
     const listener = storage.addOnValueChangedListener((key) => {
-      if (key === 'notes') {
+      if (key === "notes") {
         setNotes(getNotes());
       }
     });
@@ -27,10 +27,12 @@ export function useNotes() {
   }, []);
 
   const addNote = useCallback(
-    (partial: Pick<Note, 'title' | 'contentHTML' | 'contentJSON' | 'colorTag'>): Note => {
+    (
+      partial: Pick<Note, "title" | "contentHTML" | "contentJSON" | "colorTag">,
+    ): Note => {
       const note: Note = {
         id: generateId(),
-        title: partial.title || 'Untitled',
+        title: partial.title || "Untitled",
         contentHTML: partial.contentHTML,
         contentJSON: partial.contentJSON,
         colorTag: partial.colorTag,
@@ -83,5 +85,12 @@ export function useNotes() {
     return b.updatedAt - a.updatedAt;
   });
 
-  return { notes: sortedNotes, addNote, updateNote, deleteNote, togglePinNote, searchNotes };
+  return {
+    notes: sortedNotes,
+    addNote,
+    updateNote,
+    deleteNote,
+    togglePinNote,
+    searchNotes,
+  };
 }
