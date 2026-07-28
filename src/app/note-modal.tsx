@@ -1,7 +1,8 @@
 "use no memo";
-import { ArrowLeft, TickCircle } from 'iconsax-react-nativejs';
-import { useRef, useState } from 'react';
-import type { EditorBridge } from '@10play/tentap-editor';
+import type { EditorBridge } from "@10play/tentap-editor";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ArrowLeft, TickCircle } from "iconsax-react-nativejs";
+import { useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,27 +10,27 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { RichNoteEditor } from '@/components/editor/RichNoteEditor';
-import { useNotes } from '@/hooks/useNotes';
-import { Colors, Spacing } from '@/constants/theme';
-import { CustomDateTimePicker } from '@/components/ui/CustomDateTimePicker';
+import { stripHtmlAndDecode } from "@/components/utils/text";
+import { RichNoteEditor } from "@/components/editor/RichNoteEditor";
+import { Colors, Spacing } from "@/constants/theme";
+import { useNotes } from "@/hooks/useNotes";
 
 export default function NoteModal() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : (scheme ?? 'light')];
+  const colors =
+    Colors[scheme === "unspecified" ? "light" : (scheme ?? "light")];
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { notes, addNote, updateNote } = useNotes();
 
   const existing = id ? notes.find((n) => n.id === id) : undefined;
 
-  const [title, setTitle] = useState(existing?.title ?? '');
-  const [contentHTML, setContentHTML] = useState(existing?.contentHTML ?? '');
-  const [contentJSON, setContentJSON] = useState(existing?.contentJSON ?? '');
+  const [title, setTitle] = useState(existing?.title ?? "");
+  const [contentHTML, setContentHTML] = useState(existing?.contentHTML ?? "");
+  const [contentJSON, setContentJSON] = useState(existing?.contentJSON ?? "");
 
   const editorRef = useRef<EditorBridge | null>(null);
 
@@ -38,8 +39,21 @@ export default function NoteModal() {
     setContentJSON(json);
   };
 
-  const handleSave = () => {
-    if (!title.trim() && !contentHTML.trim()) {
+  const handleSave = async () => {
+    let finalHTML = contentHTML;
+    if (editorRef.current) {
+      try {
+        const html = await editorRef.current.getHTML();
+        if (typeof html === "string" && html.length > 0) {
+          finalHTML = html;
+        }
+      } catch (e) {
+        // Fall back to contentHTML state if bridge is unavailable
+      }
+    }
+
+    const plainText = stripHtmlAndDecode(finalHTML).trim();
+    if (!title.trim() && !plainText) {
       router.back();
       return;
     }
@@ -47,14 +61,14 @@ export default function NoteModal() {
     if (existing) {
       updateNote({
         ...existing,
-        title: title.trim() || 'Untitled',
-        contentHTML,
+        title: title.trim() || "Untitled",
+        contentHTML: finalHTML,
         contentJSON,
       });
     } else {
       addNote({
-        title: title.trim() || 'Untitled',
-        contentHTML,
+        title: title.trim() || "Untitled",
+        contentHTML: finalHTML,
         contentJSON,
       });
     }
@@ -63,18 +77,31 @@ export default function NoteModal() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
         {/* Header Toolbar */}
-        <View style={[styles.toolbar, { borderBottomColor: colors.backgroundElement }]}>
-          <TouchableOpacity onPress={() => router.back()} hitSlop={8} style={styles.toolbarBtn}>
+        <View
+          style={[
+            styles.toolbar,
+            { borderBottomColor: colors.backgroundElement },
+          ]}
+        >
+          <TouchableOpacity
+            onPress={() => router.back()}
+            hitSlop={8}
+            style={styles.toolbarBtn}
+          >
             <ArrowLeft size={22} color={colors.text} variant="Outline" />
           </TouchableOpacity>
 
           <Text style={[styles.toolbarTitle, { color: colors.textSecondary }]}>
-            {existing ? 'Edit Note' : 'New Note'}
+            {existing ? "Edit Note" : "New Note"}
           </Text>
 
-          <TouchableOpacity onPress={handleSave} hitSlop={8} style={styles.toolbarBtn}>
+          <TouchableOpacity
+            onPress={handleSave}
+            hitSlop={8}
+            style={styles.toolbarBtn}
+          >
             <TickCircle size={25} color={colors.text} variant="Linear" />
           </TouchableOpacity>
         </View>
@@ -92,7 +119,7 @@ export default function NoteModal() {
 
         {/* Rich Note Editor */}
         <RichNoteEditor
-          initialContent={existing?.contentHTML ?? ''}
+          initialContent={existing?.contentHTML ?? ""}
           onContentChange={handleContentChange}
           editorRef={editorRef}
         />
@@ -109,9 +136,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
     borderBottomWidth: 1,
@@ -121,15 +148,19 @@ const styles = StyleSheet.create({
   },
   toolbarTitle: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   titleInput: {
     fontSize: 26,
-    fontWeight: '600',
+    fontWeight: "600",
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
     letterSpacing: -0.3,
   },
-  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: { backgroundColor: '#2A2A2A', borderRadius: 16, padding: Spacing.two },
+  overlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  sheet: { backgroundColor: "#2A2A2A", borderRadius: 16, padding: Spacing.two },
 });

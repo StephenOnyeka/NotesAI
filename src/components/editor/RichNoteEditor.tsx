@@ -2,9 +2,11 @@ import {
   RichText,
   Toolbar,
   useEditorBridge,
+  TenTapStartKit,
+  BridgeExtension,
   type EditorBridge,
 } from "@10play/tentap-editor";
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 import { KeyboardStickyView } from "react-native-keyboard-controller";
 
@@ -25,10 +27,29 @@ export function RichNoteEditor({
   const colors =
     Colors[scheme === "unspecified" ? "light" : (scheme ?? "light")];
 
+  const themeExtension = useMemo(
+    () =>
+      new BridgeExtension({
+        forceName: "app-editor-theme",
+        extendCSS: `
+          .ProseMirror {
+            color: ${colors.text};
+            font-size: 16px;
+            line-height: 1.5;
+          }
+          .ProseMirror p.is-editor-empty:first-child::before {
+            color: ${colors.textSecondary};
+          }
+        `,
+      }),
+    [colors.text, colors.textSecondary],
+  );
+
   const editor = useEditorBridge({
     autofocus: false,
     avoidIosKeyboard: true,
     initialContent: initialContent || "<p></p>",
+    bridgeExtensions: [...TenTapStartKit, themeExtension],
     onChange: () => {
       editor.getHTML().then((html) => {
         onContentChange?.(html, "");
@@ -77,23 +98,44 @@ export function RichNoteEditor({
     }
   }, [editorRef, editor]);
 
-  // Set text color inside the editor
+  // Reactively update editor text color when light/dark mode changes at runtime.
+  // BridgeExtension handles the initial load (zero flash), this handles live theme switches.
   useEffect(() => {
-    editor.injectCSS(
-      `* { color: ${colors.textSecondary}; }`,
-      "editor-text-color"
-    );
-  }, [editor, colors.textSecondary]);
+    const css = `
+      .ProseMirror {
+        color: ${colors.text};
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .ProseMirror p.is-editor-empty:first-child::before {
+        color: ${colors.textSecondary};
+      }
+    `;
+
+    const inject = () =>
+      editor.injectCSS(css, "app-editor-theme");
+
+    if (editor.getEditorState().isReady) {
+      // Editor is already loaded — update immediately
+      inject();
+    } else {
+      // Editor isn't ready yet — subscribe and inject once it is
+      const unsubscribe = editor._subscribeToEditorStateUpdate(() => {
+        if (editor.getEditorState().isReady) {
+          inject();
+          unsubscribe();
+        }
+      });
+      return unsubscribe;
+    }
+  }, [editor, colors.text, colors.textSecondary]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.editorWrapper}>
         <RichText
           editor={editor}
-          style={[
-            styles.richText,
-            { backgroundColor: colors.background},
-          ]}
+          style={[styles.richText, { backgroundColor: colors.background }]}
         />
       </View>
       <KeyboardStickyView

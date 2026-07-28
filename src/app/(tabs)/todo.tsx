@@ -311,9 +311,8 @@ export default function TodoScreen() {
                 New Task
               </Text>
               <TouchableOpacity onPress={handleCloseModal} hitSlop={8}>
-                {/* <CloseCircle */}
                 <CloseSquare
-                  size={22}
+                  size={24}
                   color={colors.textSecondary}
                   variant="Bold"
                 />
