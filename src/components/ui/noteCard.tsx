@@ -1,8 +1,9 @@
-import timeAgo from "@/components/utils/timeAgo";
 import { stripHtmlAndDecode } from "@/components/utils/text";
+import timeAgo from "@/components/utils/timeAgo";
 import { Colors, Spacing } from "@/constants/theme";
 import type { Note } from "@/types";
 import { Paperclip2, Trash } from "iconsax-react-nativejs";
+import { useRef } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -26,6 +27,15 @@ export default function NoteCard({
   onDelete,
   onPin,
 }: NoteCardProps) {
+  const lastPressRef = useRef(0);
+
+  const debounce = (fn: () => void, ms = 800) => {
+    const now = Date.now();
+    if (now - lastPressRef.current < ms) return;
+    lastPressRef.current = now;
+    fn();
+  };
+
   return (
     <Pressable
       style={({ pressed }) => [
@@ -63,7 +73,7 @@ export default function NoteCard({
         </Text>
         <View style={styles.cardActions}>
           <TouchableOpacity
-            onPress={onPin}
+            onPress={() => debounce(onPin)}
             style={styles.actionBtn}
             hitSlop={8}
           >
@@ -74,7 +84,7 @@ export default function NoteCard({
             />
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={onDelete}
+            onPress={() => debounce(onDelete)}
             style={styles.actionBtn}
             hitSlop={8}
           >
