@@ -21,6 +21,11 @@ export default function RootLayout() {
           {/* Full-screen note modal */}
           <Stack.Screen
             name="note-modal"
+            // Keyed by note id so repeat taps collapse into one screen while
+            // distinct notes still get their own.
+            dangerouslySingular={(name, params) =>
+              `${name}-${params.id ?? "new"}`
+            }
             options={{
               presentation: "modal",
               animation: "slide_from_bottom",

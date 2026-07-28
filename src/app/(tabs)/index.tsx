@@ -1,5 +1,5 @@
 import { Add, SearchNormal1, Trash, Paperclip2, NoteText } from 'iconsax-react-nativejs';
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import {
   FlatList,
   Platform,
@@ -12,9 +12,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 
 import { useNotes } from '@/hooks/useNotes';
+import { useSafeNavigate } from '@/hooks/useSafeNavigate';
 import { Colors, Spacing } from '@/constants/theme';
 import type { Note } from '@/types';
 import NoteCard from '@/components/ui/noteCard';
@@ -23,7 +23,7 @@ import { CustomDateTimePicker } from '@/components/ui/CustomDateTimePicker';
 export default function NotesScreen() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : (scheme ?? 'light')];
-  const router = useRouter();
+  const { push } = useSafeNavigate();
   const { notes, deleteNote, togglePinNote, searchNotes } = useNotes();
   const [query, setQuery] = useState('');
 
@@ -33,16 +33,11 @@ export default function NotesScreen() {
   );
 
   const handleOpenNote = (note: Note) => {
-    router.push({ pathname: '/note-modal', params: { id: note.id } });
+    push({ pathname: '/note-modal', params: { id: note.id } });
   };
 
-  const lastPressRef = useRef(0);
   const handleNewNote = () => {
-    const now = Date.now();
-    // Use a longer timeout (1500ms) because dev builds can be slow to navigate
-    if (now - lastPressRef.current < 1000) return;
-    lastPressRef.current = now;
-    router.push({ pathname: '/note-modal' });
+    push({ pathname: '/note-modal' });
   };
 
   return (
