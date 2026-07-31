@@ -98,3 +98,16 @@ export function clearCompletedTodos(): void {
   const todos = getTodos().filter((t) => !t.isCompleted);
   storage.set(TODOS_KEY, JSON.stringify(todos));
 }
+
+// ─── Gemini API Key ───────────────────────────────────────────────────────────
+
+const GEMINI_API_KEY_STORAGE_KEY = 'gemini_api_key';
+
+export function getGeminiApiKey(): string | undefined {
+  return storage.getString(GEMINI_API_KEY_STORAGE_KEY);
+}
+
+export function saveGeminiApiKey(key: string): void {
+  storage.set(GEMINI_API_KEY_STORAGE_KEY, key.trim());
+}
+

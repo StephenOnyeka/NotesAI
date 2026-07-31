@@ -28,6 +28,8 @@ import { Colors, Spacing } from "@/constants/theme";
 import { useTodos } from "@/hooks/useTodos";
 import type { TodoItem } from "@/types";
 import CustomDateTimePicker from "@/components/ui/CustomDateTimePicker";
+import { AIFabButton } from "@/components/ui/AIFabButton";
+import { AIAssistantModal } from "@/components/ui/AIAssistantModal";
 
 function formatReminder(timestamp?: number): string | null {
   if (!timestamp) return null;
@@ -159,6 +161,7 @@ export default function TodoScreen() {
   } = useTodos();
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [aiModalVisible, setAiModalVisible] = useState(false);
   const [inputText, setInputText] = useState("");
   const [reminderType, setReminderType] = useState<
     "none" | "today" | "tomorrow" | "custom"
@@ -252,7 +255,7 @@ export default function TodoScreen() {
           <View style={styles.empty}>
             <TaskSquare size={45} color={colors.text} variant="Outline" />
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              No tasks yet. Tap + to add one!
+              No tasks yet. Tap + or use AI to add tasks!
             </Text>
           </View>
         ) : (
@@ -271,7 +274,10 @@ export default function TodoScreen() {
           />
         )}
 
-        {/* FAB */}
+        {/* AI Assistant FAB */}
+        <AIFabButton onPress={() => setAiModalVisible(true)} />
+
+        {/* Standard Add Task FAB */}
         <TouchableOpacity
           style={[styles.fab, { backgroundColor: "#6C63FF" }]}
           onPress={() => setModalVisible(true)}
@@ -280,6 +286,13 @@ export default function TodoScreen() {
           <Add size={28} color="#fff" variant="Outline" />
         </TouchableOpacity>
       </SafeAreaView>
+
+      {/* AI Assistant Modal */}
+      <AIAssistantModal
+        visible={aiModalVisible}
+        onClose={() => setAiModalVisible(false)}
+        activeTab="todo"
+      />
 
       {/* Add To-Do Bottom Sheet Modal */}
       <Modal
