@@ -1,56 +1,87 @@
-# Welcome to your Expo app 👋
+# NotesAI 📝✨
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An AI-powered Notes & To-Do app built with Expo and React Native. Capture rich-text notes, manage tasks, and let Google Gemini turn a single prompt into a fully formatted note or an actionable checklist — all stored locally for instant, offline-first access.
 
-## Get started
+## Features
 
-1. Install dependencies
+- **Rich text notes** — Write with headings, bold/italic/underline/strikethrough, bullet and numbered lists, and code blocks via a TipTap-powered editor (`@10play/tentap-editor`).
+- **AI assistant** — Describe what you want in plain language (typed or spoken) and Gemini generates a formatted note or a to-do list, dropping it straight into the app.
+- **To-Do management** — Interactive checklist with completion toggles, priorities, due dates, and live progress tracking.
+- **Fast local storage** — Ultra-fast, synchronous, offline-first persistence powered by `react-native-mmkv`. Your data stays on your device.
+- **Search, pin & organize** — Filter notes instantly, pin important ones, and tag notes with colors.
+- **Adaptive design** — Glassmorphic UI with automatic light/dark mode support.
+- **Cross-platform** — Runs on iOS, Android, and the web from a single codebase.
+
+## Tech Stack
+
+| Area          | Technology                                        |
+| ------------- | ------------------------------------------------- |
+| Framework     | [Expo](https://expo.dev) (SDK 57) + React Native  |
+| Language      | TypeScript                                        |
+| Routing       | `expo-router` (file-based, typed routes)          |
+| Storage       | `react-native-mmkv`                               |
+| Rich Editor   | `@10play/tentap-editor`                           |
+| AI            | Google Gemini (`@google/genai`)                   |
+| Icons         | `iconsax-react-nativejs`                          |
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org) (LTS)
+- A [Google Gemini API key](https://aistudio.google.com/app/apikey) for AI features
+- iOS Simulator / Android Emulator, or a physical device with a [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+
+> **Note:** This app relies on native modules (MMKV, WebView), so it requires a development build — it will not run in the standard Expo Go sandbox.
+
+### Installation
+
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Configure environment variables**
+
+   Copy the example file and add your Gemini API key:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   ```env
+   EXPO_PUBLIC_GEMINI_API_KEY=your_api_key_here
+   ```
+
+   You can also set the key from within the app's AI assistant if you prefer not to hardcode it.
+
+3. **Start the development server**
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   Then open the app on:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   - **Android** — `npm run android`
+   - **iOS** — `npm run ios`
+   - **Web** — `npm run web`
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Project Structure
 
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
 ```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+src/
+├── app/                 # Screens & routes (expo-router)
+│   ├── (tabs)/          # Notes & To-Do tab screens
+│   ├── note-modal.tsx   # Full-screen note editor
+│   └── _layout.tsx      # Root layout
+├── components/
+│   ├── editor/          # RichNoteEditor (10Tap wrapper)
+│   ├── ui/              # AI assistant, note cards, pickers, FAB
+│   └── ...              # Themed & shared components
+├── hooks/               # useNotes, useTodos, theming hooks
+├── services/            # mmkv (storage) & gemini (AI) services
+├── constants/           # Theme, colors, spacing
+└── types/               # Shared TypeScript models (Note, TodoItem)
+```
