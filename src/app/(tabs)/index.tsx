@@ -19,6 +19,8 @@ import { Colors, Spacing } from '@/constants/theme';
 import type { Note } from '@/types';
 import NoteCard from '@/components/ui/noteCard';
 import { CustomDateTimePicker } from '@/components/ui/CustomDateTimePicker';
+import { AIFabButton } from '@/components/ui/AIFabButton';
+import { AIAssistantModal } from '@/components/ui/AIAssistantModal';
 
 export default function NotesScreen() {
   const scheme = useColorScheme();
@@ -26,6 +28,7 @@ export default function NotesScreen() {
   const { push } = useSafeNavigate();
   const { notes, deleteNote, togglePinNote, searchNotes } = useNotes();
   const [query, setQuery] = useState('');
+  const [aiModalVisible, setAiModalVisible] = useState(false);
 
   const displayed = useMemo(
     () => (query ? searchNotes(query) : notes),
@@ -73,7 +76,7 @@ export default function NotesScreen() {
               <NoteText size={45} color={colors.text} variant="Outline" />
             </View>
             <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {query ? 'No notes match your search.' : 'Tap + to create your first note.'}
+              {query ? 'No notes match your search.' : 'Tap + or use AI to create your first note.'}
             </Text>
           </View>
         ) : (
@@ -97,7 +100,10 @@ export default function NotesScreen() {
         <CustomDateTimePicker/>
       </SafeAreaView>
 
-      {/* FAB */}
+      {/* AI Assistant FAB */}
+      <AIFabButton onPress={() => setAiModalVisible(true)} />
+
+      {/* Standard Create Note FAB */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: '#6C63FF' }]}
         onPress={handleNewNote}
@@ -105,6 +111,14 @@ export default function NotesScreen() {
       >
         <Add size={28} color="#fff" variant="Outline" />
       </TouchableOpacity>
+
+      {/* AI Assistant Modal */}
+      <AIAssistantModal
+        visible={aiModalVisible}
+        onClose={() => setAiModalVisible(false)}
+        activeTab="notes"
+        onNoteCreated={(noteId) => push({ pathname: '/note-modal', params: { id: noteId } })}
+      />
     </View>
   );
 }
