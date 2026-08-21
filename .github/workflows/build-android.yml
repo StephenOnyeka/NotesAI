@@ -47,11 +47,13 @@ jobs:
           BUILD_ID=$(node -e "
             const fs = require('fs');
             const data = JSON.parse(fs.readFileSync('build.json', 'utf8'));
-            console.log(data.id || data.buildId || data.build?.id);
+            const build = Array.isArray(data) ? data[0] : data;
+            console.log(build.id || build.buildId || build.build?.id || '');
           ")
 
           if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "undefined" ]; then
             echo "❌ Could not find EAS Build ID"
+            cat build.json
             exit 1
           fi
 
