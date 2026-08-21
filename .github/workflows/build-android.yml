@@ -60,12 +60,32 @@ jobs:
           echo "BUILD_ID=$BUILD_ID" >> "$GITHUB_OUTPUT"
           echo "✅ EAS Build ID: $BUILD_ID"
 
+      # - name: 📥 Download APK
+      #   env:
+      #     EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      #   run: |
+      #     mkdir -p dist
+
+      #     eas build:download \
+      #       --build-id "${{ steps.build-info.outputs.BUILD_ID }}" \
+      #       --non-interactive
+
+      #     APK=$(find . -type f -name "*.apk" | head -n 1)
+
+      #     if [ -z "$APK" ]; then
+      #       echo "❌ APK was not found"
+      #       exit 1
+      #     fi
+
+      #     echo "✅ APK found: $APK"
+
+      #     cp "$APK" dist/app-release.apk
+           
       - name: 📥 Download APK
         env:
         EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           mkdir -p dist
-
           eas build:download \
           --build-id "${{ steps.build-info.outputs.BUILD_ID }}" \
           --non-interactive \
@@ -74,10 +94,10 @@ jobs:
           if [ ! -f dist/app-release.apk ]; then
           echo "❌ APK was not found"
           exit 1
+          
           fi
 
           echo "✅ APK found: dist/app-release.apk"
-
 
       - name: 🏷️ Generate release tag
         id: release
