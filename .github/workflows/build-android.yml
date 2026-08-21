@@ -12,12 +12,12 @@ jobs:
 
     steps:
       - name: 📥 Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 🟢 Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
           cache: npm
 
       - name: 📦 Install dependencies
@@ -27,6 +27,7 @@ jobs:
         run: npm install --global eas-cli
 
       - name: 🔨 Build APK with EAS
+        id: eas-build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
@@ -34,18 +35,49 @@ jobs:
             --platform android \
             --profile preview \
             --non-interactive \
-            --wait
+            --wait \
+            --json > build.json
+
+          echo "EAS build result:"
+          cat build.json
+
+      - name: 🔎 Get EAS Build ID
+        id: build-info
+        run: |
+          BUILD_ID=$(node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('build.json', 'utf8'));
+            console.log(data.id || data.buildId || data.build?.id);
+          ")
+
+          if [ -z "$BUILD_ID" ] || [ "$BUILD_ID" = "undefined" ]; then
+            echo "❌ Could not find EAS Build ID"
+            exit 1
+          fi
+
+          echo "BUILD_ID=$BUILD_ID" >> "$GITHUB_OUTPUT"
+          echo "✅ EAS Build ID: $BUILD_ID"
 
       - name: 📥 Download APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           mkdir -p dist
+
           eas build:download \
-            --platform android \
-            --profile preview \
-            --latest \
-            --output dist/app-release.apk
+            --build-id "${{ steps.build-info.outputs.BUILD_ID }}" \
+            --non-interactive
+
+          APK=$(find . -type f -name "*.apk" | head -n 1)
+
+          if [ -z "$APK" ]; then
+            echo "❌ APK was not found"
+            exit 1
+          fi
+
+          echo "✅ APK found: $APK"
+
+          cp "$APK" dist/app-release.apk
 
       - name: 🏷️ Generate release tag
         id: release

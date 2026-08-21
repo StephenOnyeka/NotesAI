@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NotesAI — AI-Powered Notes & To-Do App</title>
+  <meta name="description" content="An AI-powered Notes & To-Do app built with Expo and React Native. Capture rich-text notes, manage tasks, and let AI generate formatted notes and checklists instantly." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#E6F4FE',
+              100: '#C0E5FC',
+              200: '#8DCFF9',
+              300: '#5AB8F5',
+              400: '#2FA2F1',
+              500: '#208AEF',
+              600: '#1A6EC0',
+              700: '#135390',
+              800: '#0D3860',
+              900: '#061C30',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    .gradient-text {
+      background: linear-gradient(135deg, #208AEF 0%, #5AB8F5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-12px); }
+    }
+    .float-1 { animation: float 6s ease-in-out infinite; }
+    .float-2 { animation: float 6s ease-in-out 1s infinite; }
+    .float-3 { animation: float 6s ease-in-out 2s infinite; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    .pulse-ring::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid #208AEF;
+      animation: pulse-ring 2s ease-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-white text-slate-900 antialiased font-sans">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 inset-x-0 z-50 glass border-b border-white/20">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/30">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <span class="text-lg font-bold tracking-tight">Notes<span class="text-brand-500">AI</span></span>
+      </a>
+      <div class="hidden sm:flex items-center gap-8 text-sm font-medium text-slate-500">
+        <a href="#features" class="hover:text-brand-500 transition-colors">Features</a>
+        <a href="#how-it-works" class="hover:text-brand-500 transition-colors">How It Works</a>
+        <a href="#tech" class="hover:text-brand-500 transition-colors">Tech Stack</a>
+      </div>
+      <a href="#download" class="px-5 py-2 bg-brand-500 text-white text-sm font-semibold rounded-full hover:bg-brand-600 transition-all hover:shadow-lg hover:shadow-brand-500/30 active:scale-95">
+        Get the App
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative min-h-screen flex items-center justify-center pt-16 overflow-hidden">
+    <!-- Background blobs -->
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-brand-200/40 rounded-full blur-3xl float-1"></div>
+      <div class="absolute bottom-20 right-10 w-96 h-96 bg-brand-300/20 rounded-full blur-3xl float-2"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-100/20 rounded-full blur-3xl float-3"></div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-16 items-center">
+      <!-- Left: Copy -->
+      <div>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-50 border border-brand-200 text-brand-600 text-xs font-semibold mb-6">
+          <span class="relative flex h-2 w-2">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75 animate-ping"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+          </span>
+          Powered by Google Gemini
+        </div>
+
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight mb-6">
+          Your notes.<br/>
+          <span class="gradient-text">Smarter.</span>
+        </h1>
+
+        <p class="text-lg text-slate-500 max-w-lg mb-10 leading-relaxed">
+          Write rich-text notes, manage tasks, and let AI turn a single prompt into a fully formatted note or actionable checklist — all stored locally on your device.
+        </p>
+
+        <div class="flex flex-wrap gap-4">
+          <a href="#download" class="px-8 py-3.5 bg-brand-500 text-white font-semibold rounded-full hover:bg-brand-600 transition-all hover:shadow-xl hover:shadow-brand-500/30 active:scale-95 text-sm">
+            Download Free
+          </a>
+          <a href="#features" class="px-8 py-3.5 border-2 border-slate-200 text-slate-700 font-semibold rounded-full hover:border-brand-300 hover:text-brand-600 transition-all text-sm">
+            Explore Features
+          </a>
+        </div>
+
+        <div class="flex items-center gap-6 mt-10 text-sm text-slate-400">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            100% Offline
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            Free & Open Source
+          </div>
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+            Cross-Platform
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: App mockup card -->
+      <div class="relative flex justify-center lg:justify-end">
+        <div class="relative w-72 sm:w-80">
+          <!-- Phone frame -->
+          <div class="relative bg-slate-900 rounded-[2.5rem] p-3 shadow-2xl shadow-slate-900/30">
+            <!-- Notch -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-slate-900 rounded-b-2xl z-10"></div>
+            <!-- Screen -->
+            <div class="bg-white rounded-[2rem] overflow-hidden pt-8">
+              <!-- Status bar -->
+              <div class="px-5 pb-2 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                <span>9:41</span>
+                <div class="flex gap-1">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/></svg>
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M17.778 8.222c-4.296-4.296-11.26-4.296-15.556 0A1 1 0 01.808 6.808c5.076-5.077 13.308-5.077 18.384 0a1 1 0 01-1.414 1.414zM14.95 11.05a7 7 0 00-9.9 0 1 1 0 01-1.414-1.414 9 9 0 0112.728 0 1 1 0 01-1.414 1.414zM12.12 13.88a3 3 0 00-4.242 0 1 1 0 01-1.414-1.414 5 5 0 017.072 0 1 1 0 01-1.414 1.414zM9 16a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+                </div>
+              </div>
+
+              <!-- App content -->
+              <div class="px-5 pb-6">
+                <p class="text-[11px] text-slate-400 mb-1">Good morning 👋</p>
+                <h3 class="text-base font-bold text-slate-800 mb-4">Your Notes</h3>
+
+                <!-- Note cards -->
+                <div class="space-y-3">
+                  <div class="bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl p-4 text-white shadow-lg shadow-brand-500/20">
+                    <div class="flex items-center gap-1.5 mb-2">
+                      <span class="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+                      <span class="text-[10px] font-medium text-white/80 uppercase tracking-wide">AI Generated</span>
+                    </div>
+                    <p class="text-sm font-semibold leading-snug">Weekly Meeting Notes</p>
+                    <p class="text-xs text-white/70 mt-1">5 action items · 3 key decisions</p>
+                  </div>
+
+                  <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-[10px] font-medium text-slate-400 uppercase tracking-wide">To-Do</span>
+                      <span class="text-[10px] font-bold text-brand-500">73%</span>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-800">Project Roadmap</p>
+                    <div class="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div class="h-full w-[73%] bg-brand-500 rounded-full"></div>
+                    </div>
+                  </div>
+
+                  <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    <div class="flex items-center gap-1.5 mb-2">
+                      <span class="text-[10px] font-medium text-slate-400 uppercase tracking-wide">Pinned</span>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-800">App Ideas 💡</p>
+                    <p class="text-xs text-slate-400 mt-1">4 ideas saved</p>
+                  </div>
+                </div>
+
+                <!-- FAB -->
+                <div class="flex justify-center mt-5">
+                  <div class="w-12 h-12 bg-brand-500 rounded-full flex items-center justify-center shadow-lg shadow-brand-500/30 relative pulse-ring">
+                    <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating badges -->
+          <div class="absolute -top-4 -right-6 bg-white rounded-2xl p-3 shadow-xl shadow-slate-200/50 border border-slate-100 float-1">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-[11px] font-bold text-slate-800">AI Assist</p>
+                <p class="text-[9px] text-slate-400">Ready</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="absolute -bottom-3 -left-6 bg-white rounded-2xl p-3 shadow-xl shadow-slate-200/50 border border-slate-100 float-2">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-[11px] font-bold text-slate-800">Offline</p>
+                <p class="text-[9px] text-slate-400">Data saved locally</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-24 bg-slate-50/60">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <p class="text-brand-500 font-semibold text-sm uppercase tracking-wider mb-3">Features</p>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+          Everything you need,<br class="hidden sm:block" /> nothing you don't.
+        </h2>
+        <p class="mt-4 text-slate-500 max-w-xl mx-auto text-lg">
+          A minimal, powerful note-taking experience enhanced by AI — built for speed and simplicity.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Feature 1 -->
+        <div class="group bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-100/40 transition-all duration-300">
+          <div class="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
+            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold mb-2">AI-Powered Assistant</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Describe what you want in plain language — typed or spoken — and Gemini generates formatted notes or checklists instantly.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="group bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-100/40 transition-all duration-300">
+          <div class="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
+            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Rich Text Editing</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Write with headings, bold, italic, strikethrough, bullet & numbered lists, and code blocks through a powerful TipTap editor.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="group bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-100/40 transition-all duration-300">
+          <div class="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
+            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Smart To-Dos</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Interactive checklists with completion toggles, priorities, due dates, and live progress tracking to stay on top of everything.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="group bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-100/40 transition-all duration-300">
+          <div class="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
+            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Blazing Fast Storage</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Ultra-fast, synchronous, offline-first persistence with MMKV. Your data stays on your device — no cloud dependency required.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="group bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-100/40 transition-all duration-300">
+          <div class="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
+            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Search, Pin & Organize</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Filter notes instantly, pin important ones, and tag them with colors so you always find what you need, fast.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="group bg-white rounded-3xl p-8 border border-slate-100 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-100/40 transition-all duration-300">
+          <div class="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-5 group-hover:bg-brand-100 transition-colors">
+            <svg class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z" />
+            </svg>
+          </div>
+          <h3 class="text-lg font-bold mb-2">Adaptive Design</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Glassmorphic UI with automatic light/dark mode support that adapts beautifully to your system preferences.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="py-24">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <p class="text-brand-500 font-semibold text-sm uppercase tracking-wider mb-3">How It Works</p>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+          Three steps to smarter notes.
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-brand-500 text-white rounded-3xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-6 shadow-lg shadow-brand-500/30">
+            1
+          </div>
+          <h3 class="text-xl font-bold mb-3">Tell the AI what you need</h3>
+          <p class="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
+            Type or speak a prompt like "Summarize my meeting notes" or "Create a workout checklist."
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 bg-brand-500 text-white rounded-3xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-6 shadow-lg shadow-brand-500/30">
+            2
+          </div>
+          <h3 class="text-xl font-bold mb-3">AI generates your content</h3>
+          <p class="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
+            Gemini creates a beautifully formatted note or actionable to-do list in seconds.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 bg-brand-500 text-white rounded-3xl flex items-center justify-center text-2xl font-extrabold mx-auto mb-6 shadow-lg shadow-brand-500/30">
+            3
+          </div>
+          <h3 class="text-xl font-bold mb-3">Organize and access offline</h3>
+          <p class="text-slate-500 text-sm leading-relaxed max-w-xs mx-auto">
+            Pin, tag, search, and edit your notes — everything is saved locally on your device, always available.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack -->
+  <section id="tech" class="py-24 bg-slate-50/60">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="text-center mb-16">
+        <p class="text-brand-500 font-semibold text-sm uppercase tracking-wider mb-3">Built With</p>
+        <h2 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+          Modern tech, zero compromise.
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 text-center hover:shadow-lg transition-shadow">
+          <p class="text-3xl mb-3">⚛️</p>
+          <p class="font-bold text-sm">Expo SDK 57</p>
+          <p class="text-xs text-slate-400 mt-1">Cross-platform</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 text-center hover:shadow-lg transition-shadow">
+          <p class="text-3xl mb-3">🤖</p>
+          <p class="font-bold text-sm">Google Gemini</p>
+          <p class="text-xs text-slate-400 mt-1">AI Engine</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 text-center hover:shadow-lg transition-shadow">
+          <p class="text-3xl mb-3">💾</p>
+          <p class="font-bold text-sm">MMKV</p>
+          <p class="text-xs text-slate-400 mt-1">Local Storage</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-slate-100 text-center hover:shadow-lg transition-shadow">
+          <p class="text-3xl mb-3">📝</p>
+          <p class="font-bold text-sm">10Tap Editor</p>
+          <p class="text-xs text-slate-400 mt-1">Rich Text</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download / CTA -->
+  <section id="download" class="py-24 relative overflow-hidden">
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-500 to-brand-700"></div>
+      <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+      <div class="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3"></div>
+    </div>
+
+    <div class="max-w-3xl mx-auto px-6 text-center">
+      <h2 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight mb-6">
+        Start taking smarter notes today.
+      </h2>
+      <p class="text-brand-100 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+        Free, fast, and private. Your notes stay on your device. No sign-up required — just download and go.
+      </p>
+
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="#" class="inline-flex items-center gap-3 px-8 py-4 bg-white text-slate-900 font-bold rounded-2xl hover:bg-brand-50 transition-all hover:shadow-2xl active:scale-95">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 01-.61-.92V2.734a1 1 0 01.609-.92zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.199l2.302 2.302-2.302 2.302L15.396 12l2.302-2.492zM5.864 2.658L16.8 8.99l-2.302 2.302L5.864 2.658z"/>
+          </svg>
+          Download APK
+        </a>
+        <a href="https://github.com/StephenOnyeka/NotesAI" target="_blank" rel="noopener" class="inline-flex items-center gap-3 px-8 py-4 bg-white/10 text-white font-bold rounded-2xl border border-white/20 hover:bg-white/20 transition-all hover:shadow-2xl active:scale-95">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          View on GitHub
+        </a>
+      </div>
+
+      <p class="text-brand-200 text-xs mt-8">
+        Available for iOS, Android & Web · Built with Expo + React Native
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-10 border-t border-slate-100">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <span class="text-sm font-bold">Notes<span class="text-brand-500">AI</span></span>
+      </div>
+      <p class="text-xs text-slate-400">&copy; 2026 NotesAI. Built with ❤️ by Stephen Onyeka.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
