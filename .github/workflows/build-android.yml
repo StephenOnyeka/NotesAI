@@ -64,19 +64,29 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
+          set -e
+          eas --version
+
           mkdir -p dist
+          cd dist
+
           eas build:download \
           --build-id "${{ steps.build-info.outputs.BUILD_ID }}" \
-          --non-interactive \
-          --path dist/app-release.apk
+          --non-interactive
 
-          if [ ! -f dist/app-release.apk ]; then
-          echo "❌ APK was not found"
-          exit 1
+          APK=$(find . -maxdepth 1 -type f -name "*.apk" -print -quit || true)
 
+          if [ -z "$APK" ]; then
+            echo "❌ APK was not found"
+            echo "Contents of dist:"
+            ls -la
+            exit 1
           fi
 
+          mv "$APK" app-release.apk
+
           echo "✅ APK found: dist/app-release.apk"
+          ls -lh app-release.apk
 
       - name: 🏷️ Generate release tag
         id: release
