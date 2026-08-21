@@ -62,7 +62,7 @@ jobs:
            
       - name: 📥 Download APK
         env:
-        EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           mkdir -p dist
           eas build:download \
