@@ -65,28 +65,40 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           set -e
-          eas --version
-
           mkdir -p dist
-          cd dist
 
           eas build:download \
-          --build-id "${{ steps.build-info.outputs.BUILD_ID }}" \
-          --non-interactive
+            --build-id "${{ steps.build-info.outputs.BUILD_ID }}" \
+            --non-interactive \
+            --json > download.json
 
-          APK=$(find . -maxdepth 1 -type f -name "*.apk" -print -quit || true)
+          echo "EAS download result:"
+          cat download.json
 
-          if [ -z "$APK" ]; then
-            echo "❌ APK was not found"
-            echo "Contents of dist:"
-            ls -la
+          APK_PATH=$(node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('download.json', 'utf8'));
+            const d = Array.isArray(data) ? data[0] : data;
+            console.log(
+              d.applicationArchivePath ||
+              d.path ||
+              d.artifacts?.applicationArchive?.path ||
+              d.result?.applicationArchivePath ||
+              ''
+            );
+          ")
+
+          if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then
+            echo "❌ Could not resolve downloaded APK path from eas-cli JSON output"
+            echo "Raw JSON was:"
+            cat download.json
             exit 1
           fi
 
-          mv "$APK" app-release.apk
+          cp "$APK_PATH" dist/app-release.apk
 
           echo "✅ APK found: dist/app-release.apk"
-          ls -lh app-release.apk
+          ls -lh dist/app-release.apk
 
       - name: 🏷️ Generate release tag
         id: release
