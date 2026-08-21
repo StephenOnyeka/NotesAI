@@ -85,3 +85,38 @@ src/
 ├── constants/           # Theme, colors, spacing
 └── types/               # Shared TypeScript models (Note, TodoItem)
 ```
+
+# Android APK Build & Release Flow
+
+This project uses GitHub Actions and EAS Build to automatically build
+and publish the Android APK.
+
+## Flow
+
+```text
+You
+ │
+ └── GitHub → Run workflow
+                 │
+                 ▼
+          GitHub Actions
+                 │
+          EXPO_TOKEN 🔐
+                 │
+                 ▼
+             EAS Build
+                 │
+                 ▼
+             APK built
+                 │
+                 ▼
+          GitHub Release
+                 │
+                 ▼
+       latest/download/app-release.apk
+                 │
+                 ▼
+        Website Download Button
+                 │
+                 ▼
+            Android Phone
