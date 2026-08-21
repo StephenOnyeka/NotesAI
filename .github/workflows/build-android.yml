@@ -14,12 +14,6 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: ☕ Setup Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -29,16 +23,29 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      - name: ⚙️ Expo prebuild
-        run: npx expo prebuild --platform android --clean
+      - name: 🚀 Setup EAS CLI
+        run: npm install --global eas-cli
 
-      - name: 🔐 Make gradlew executable
-        working-directory: android
-        run: chmod +x ./gradlew
+      - name: 🔨 Build APK with EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --wait
 
-      - name: 🏗️ Build Android Release APK
-        working-directory: android
-        run: ./gradlew clean assembleRelease
+      - name: 📥 Download APK
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          mkdir -p dist
+          eas build:download \
+            --platform android \
+            --profile preview \
+            --latest \
+            --output dist/app-release.apk
 
       - name: 🏷️ Generate release tag
         id: release
@@ -49,6 +56,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.TAG }}
-          name: Android App ${{ steps.release.outputs.TAG }}
-          files: android/app/build/outputs/apk/release/app-release.apk
+          name: NotesAI Android ${{ steps.release.outputs.TAG }}
+          files: dist/app-release.apk
           generate_release_notes: true
+
+      - name: 📋 Build summary
+        run: |
+          echo "## ✅ Android APK Build Successful!" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "📱 APK: app-release.apk" >> "$GITHUB_STEP_SUMMARY"
+          echo "🏷️ Release: ${{ steps.release.outputs.TAG }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "📥 Download: https://github.com/${{ github.repository }}/releases/latest/download/app-release.apk" >> "$GITHUB_STEP_SUMMARY"
