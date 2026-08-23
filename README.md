@@ -101,10 +101,13 @@ You
                  ▼
           GitHub Actions
                  │
-          EXPO_TOKEN 🔐
+        Java 17 + Node 20
                  │
                  ▼
-             EAS Build
+        Expo prebuild (native android/ folder)
+                 │
+                 ▼
+        Gradle assembleRelease
                  │
                  ▼
              APK built
