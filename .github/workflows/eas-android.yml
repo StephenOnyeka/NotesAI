@@ -1,3 +1,4 @@
+# Fixes the signature issue for the app.
 name: EAS Android APK (EAS Local)
 
 on:
