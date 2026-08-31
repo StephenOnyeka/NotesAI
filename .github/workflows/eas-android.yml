@@ -1,0 +1,52 @@
+name: Build Android APK (EAS Local)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: ☕ Setup Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: 🤖 Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: 📦 Install dependencies
+        run: npm ci
+
+      - name: 📦 Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: 🏗️ EAS Build (local)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_GEMINI_API_KEY: ${{ secrets.EXPO_PUBLIC_GEMINI_API_KEY }}
+        run: eas build --platform android --profile preview --local --output ./app-release.apk
+
+      - name: 🏷️ Generate release tag
+        id: release
+        run: echo "TAG=v1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+      - name: 🚀 Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.TAG }}
+          name: Android App ${{ steps.release.outputs.TAG }}
+          files: ./app-release.apk
+          generate_release_notes: true
+        permissions:
+          contents: write
