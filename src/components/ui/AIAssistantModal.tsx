@@ -1,4 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 import {
   Modal,
   View,
@@ -53,7 +57,6 @@ export function AIAssistantModal({
 
   // Voice recording state
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (visible) {
@@ -68,50 +71,43 @@ export function AIAssistantModal({
     }
   }, [visible]);
 
-  // Speech Recognition setup (Web Speech API)
-  const startListening = () => {
-    if (typeof window === 'undefined') return;
+  // ── Native Speech Recognition (expo-speech-recognition) ──────────────────
+  // Hooks register native event listeners for the entire lifetime of this component.
+  useSpeechRecognitionEvent('start', () => {
+    setIsListening(true);
+    setErrorMsg(null);
+  });
 
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  useSpeechRecognitionEvent('end', () => {
+    setIsListening(false);
+  });
 
-    if (!SpeechRecognition) {
-      setErrorMsg('Voice recognition is not supported on this browser/device. Please type your command.');
-      return;
+  useSpeechRecognitionEvent('result', (event) => {
+    // event.results[0].transcript holds the best transcription so far.
+    const transcript = event.results[0]?.transcript ?? '';
+    if (transcript) setInputText(transcript);
+  });
+
+  useSpeechRecognitionEvent('error', (event) => {
+    setIsListening(false);
+    if (event.error !== 'no-speech') {
+      setErrorMsg(`Voice error: ${event.error}`);
     }
+  });
 
+  const startListening = async () => {
     try {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
-
-      recognition.onstart = () => {
-        setIsListening(true);
-        setErrorMsg(null);
-      };
-
-      recognition.onresult = (event: any) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        setInputText(transcript);
-      };
-
-      recognition.onerror = (event: any) => {
-        setIsListening(false);
-        if (event.error !== 'no-speech') {
-          setErrorMsg(`Voice error: ${event.error}`);
-        }
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
+      const { granted } = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!granted) {
+        setErrorMsg('Microphone permission denied. Please allow it in your device Settings.');
+        return;
+      }
+      setErrorMsg(null);
+      ExpoSpeechRecognitionModule.start({
+        lang: 'en-US',
+        interimResults: true,
+        continuous: false,
+      });
     } catch (e: any) {
       setIsListening(false);
       setErrorMsg('Could not start voice recognition.');
@@ -119,12 +115,9 @@ export function AIAssistantModal({
   };
 
   const stopListening = () => {
-    if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch {}
-      recognitionRef.current = null;
-    }
+    try {
+      ExpoSpeechRecognitionModule.stop();
+    } catch {}
     setIsListening(false);
   };
 
