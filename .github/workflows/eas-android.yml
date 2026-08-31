@@ -6,6 +6,8 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v5
@@ -48,5 +50,11 @@ jobs:
           name: Android App ${{ steps.release.outputs.TAG }}
           files: ./app-release.apk
           generate_release_notes: true
-        permissions:
-          contents: write
+
+      - name: 📋 Build summary
+        run: |
+          echo "## ✅ Android APK Build Successful!" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "📱 APK: app-release.apk" >> "$GITHUB_STEP_SUMMARY"
+          echo "🏷️ Release: ${{ steps.release.outputs.TAG }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "📥 Download: https://github.com/${{ github.repository }}/releases/latest/download/app-release.apk" >> "$GITHUB_STEP_SUMMARY"
