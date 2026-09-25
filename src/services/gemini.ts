@@ -59,7 +59,7 @@ Always provide a concise, friendly "summary" string explaining what you created.
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-1.5-flash',
       contents: userPrompt,
       config: {
         systemInstruction,
